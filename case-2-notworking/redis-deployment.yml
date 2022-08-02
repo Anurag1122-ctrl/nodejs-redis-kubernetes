@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-server
+  labels: 
+    application: node-redis-example-3
+    component: redis-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: node-redis-example-3
+      component: redis-server
+      # app: backend-restapp-redis
+  template: 
+    metadata:
+      labels:
+        application: node-redis-example-3
+        component: redis-server
+    spec:
+      containers:
+        - name: redis-server
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+              name: http
+              protocol: TCP
