@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app3-nodejs-deployment
+  labels:
+    app: app3-nodejs 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app3-nodejs
+  template:
+    metadata:
+      labels:
+        app: app3-nodejs
+    spec:
+      containers:
+      - name: app3-nodejs
+        image: p*****.ecr.aws/*****/****:v5
+        ports:
+        - containerPort: 8888
+      - name: redis
+        image: redis:latest
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - mountPath: /srv/www
+          name: redis-storage
+          #        resources:
+          #requests:
+          #  cpu: 100m
+          #  memory: 50Mi
+      volumes:
+      - name: redis-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app3-nodejs-nodeport-service
+  labels:
+    app: app3-nodejs
+  annotations:
+#Important Note:  Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer
+    alb.ingress.kubernetes.io/healthcheck-path: /
+spec:
+  type: NodePort
+  selector:
+    app: app3-nodejs
+  ports:
+    - port: 80
+      targetPort: 8888
